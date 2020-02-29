@@ -1,0 +1,11 @@
+[package]
+name = "1-6-cipher"
+version = "0.0.0"
+
+[[bin]]
+name = "1-6-cipher"
+path = "./src/main.rs"
+
+[dependencies]
+encode = { path = "../encode" }
+hex = "*"
