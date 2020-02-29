@@ -47,3 +47,9 @@ that the message would be a UTF-8 valid message.
 ```sh
 cargo run --bin 1-4-cipher -- data/1-4-cipher.txt | sort --reverse | head -n 1
 ```
+
+## 1.5 - Implement repeating-key XOR
+
+This was straight forward, XOR each byte with a cycling character in the key _ICE_.
+The code on this one is concise thanks to rust iterators, specifically the cycling
+iterator to hash the source masterial against.
