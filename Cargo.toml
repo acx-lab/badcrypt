@@ -6,4 +6,5 @@ members = [
   "./1-3-cipher",
   "./1-4-cipher",
   "./1-5-cipher",
+  "./1-6-cipher",
 ]

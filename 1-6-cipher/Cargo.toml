@@ -7,5 +7,6 @@ name = "1-6-cipher"
 path = "./src/main.rs"
 
 [dependencies]
+xor = { path = "../xor" }
 encode = { path = "../encode" }
-hex = "*"
+base64 = "0.11.0"

@@ -8,3 +8,4 @@ path = "./src/main.rs"
 
 [dependencies]
 encode = { path = "../encode" }
+xor = { path = "../xor" }
