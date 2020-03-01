@@ -19,17 +19,16 @@ pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u8 {
 
 /// A basic scoring algorithm based on frequencies of characters in a text specimen
 /// of 40,000 words. The score is the sum of the distances from the expected
-/// character frequencies and the real chracter frequencies. A smaller score indicates
-/// a phrase that better conforms to expected character distributions.
+/// character frequencies and the real chracter frequencies. The higher the score,
+/// the more the frequencies align with the expected distribution.
 ///
 /// http://pi.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html
 pub fn score(phrase: &str) -> f64 {
     let mut freq: HashMap<char, i32> = HashMap::new();
 
-    for c in b'a'..=b'z' {
+    for c in b'A'..=b'z' {
         freq.insert(char::from(c), 0);
     }
-    freq.insert(' ', 0);
 
     for c in phrase.to_lowercase().chars() {
         let e = freq.entry(c).or_insert(0);
@@ -65,7 +64,6 @@ pub fn score(phrase: &str) -> f64 {
             'x' => 0.17,
             'y' => 2.11,
             'z' => 0.07,
-            ' ' => 18.0,
             // Real messages have whitespace. This wasn't included in the character
             // frequency reference so I gave it a low-ish value.
             _ => continue,
@@ -74,7 +72,7 @@ pub fn score(phrase: &str) -> f64 {
         let distance = (expected_freq - real_freq).abs();
         score += distance;
     }
-    score
+    f64::from(1) - score
 }
 
 /// Returns a decrypted message from a string buffer.
@@ -89,32 +87,30 @@ pub fn decrypt(c: &Vec<u8>, key: u8) -> String {
     return String::from_utf8(decrypted).unwrap_or("".to_string());
 }
 
+#[derive(Debug, Clone)]
 pub struct Guess {
     pub phrase: String,
     pub score: f64,
-    pub key: Option<char>,
+    pub key: char,
 }
 
 pub fn do_best_guess(phrase: Vec<u8>) -> Guess {
-    let mut best_guess = Guess {
-        phrase: "".to_string(),
-        score: f64::from(1000),
-        key: None,
-    };
-
     // Not sure if the characters are limited to letters. Run through a wide range
     // of ascii characters.
+    let mut scores = vec!();
     for c in b' '..=b'~' {
         let phrase = decrypt(&phrase, c);
         let s = score(phrase.as_str());
-        if s < best_guess.score {
-            best_guess.phrase = phrase;
-            best_guess.score = s;
-            best_guess.key = Some(char::from(c));
-        }
+        scores.push(Guess {
+            phrase,
+            score: s,
+            key: char::from(c),
+        });
     }
-    best_guess
-}
+
+    scores.sort_by(|a, b,| a.score.partial_cmp(&b.score).unwrap());
+    scores.last().unwrap().clone()
+  }
 
 #[cfg(test)]
 mod tests {
@@ -144,7 +140,7 @@ mod tests {
         let source = "hello i am a fake phrase";
         let phrase = decrypt(&Vec::from(source), b'z');
         // Can derive encryption key using scoring algorithm.
-        assert_eq!(do_best_guess(Vec::from(phrase)).key.unwrap(), 'z');
+        assert_eq!(do_best_guess(Vec::from(phrase)).key, 'z');
     }
 
     #[test]
@@ -152,6 +148,6 @@ mod tests {
         let source = "hello i am a FAKE phrase";
         let phrase = decrypt(&Vec::from(source), b'I');
         // Can derive encryption key using scoring algorithm.
-        assert_eq!(do_best_guess(Vec::from(phrase)).key.unwrap(), 'I');
+        assert_eq!(do_best_guess(Vec::from(phrase)).key, 'I');
     }
 }

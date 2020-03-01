@@ -1,0 +1,4 @@
+[package]
+name = "buffer"
+version = "0.0.1"
+authors = ["Allan Calix <contact@allancalix.com>"]

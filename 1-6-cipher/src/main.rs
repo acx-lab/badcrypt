@@ -24,7 +24,7 @@ fn guess_key_size(cipher: &Vec<u8>) -> Vec<u8> {
     }
     result.sort_by(|x, y| x.0.cmp(&y.0));
     // Return top three results.
-    result.iter().map(|x| x.1).take(6).collect::<Vec<u8>>()
+    result.iter().map(|x| x.1).take(3).collect::<Vec<u8>>()
 }
 
 fn main() {
@@ -44,13 +44,10 @@ fn main() {
     for size in sizes {
         let mut key_guess = vec![];
         for i in 0..(size as usize) {
-            let block: Vec<u8> = buf
-                .clone()
-                .into_iter()
-                .skip(i)
-                .step_by(size as usize)
-                .collect();
-            key_guess.push(xor::do_best_guess(block).key.unwrap());
+            let chunks = buffer::chunk_by_size(&buf, i);
+            for chunk in chunks {
+                key_guess.push(xor::do_best_guess(chunk).key);
+            }
         }
         keys.push(key_guess);
       }
@@ -65,7 +62,7 @@ fn main() {
                 c ^ *kv as u8
             })
             .collect();
-        println!("{:?}", key);
-        // println!("{}", String::from_utf8(text).unwrap_or("failed to parse".to_string()));
+        // println!("{:?}", key);
+        println!("{}", String::from_utf8(text).unwrap());
     }
 }

@@ -2,6 +2,7 @@
 
 members = [
   "./encode",
+  "./buffer",
   "./xor",
   "./1-3-cipher",
   "./1-4-cipher",
