@@ -102,7 +102,7 @@ pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
     // of ascii characters.
     let mut scores = vec![];
     for c in b' '..=b'~' {
-        let phrase = decrypt(&phrase, String::from_utf8(vec!(c)).unwrap().as_str());
+        let phrase = decrypt(&phrase, String::from_utf8(vec![c]).unwrap().as_str());
         let encoded_phrase = String::from_utf8(phrase).unwrap();
         let s = score(encoded_phrase.as_str());
         scores.push(Guess {
