@@ -18,8 +18,9 @@ pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u8 {
 }
 
 /// A basic scoring algorithm based on frequencies of characters in a text specimen
-/// of 40,000 words. Each character adds to the score weighted by the expected
-/// frequency and the highest score wins.
+/// of 40,000 words. The score is the sum of the distances from the expected
+/// character frequencies and the real chracter frequencies. A smaller score indicates
+/// a phrase that better conforms to expected character distributions.
 ///
 /// http://pi.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html
 pub fn score(phrase: &str) -> f64 {
@@ -144,5 +145,13 @@ mod tests {
         let phrase = decrypt(&Vec::from(source), b'z');
         // Can derive encryption key using scoring algorithm.
         assert_eq!(do_best_guess(Vec::from(phrase)).key.unwrap(), 'z');
+    }
+
+    #[test]
+    fn test_scoring_can_guess_uppercase_key() {
+        let source = "hello i am a FAKE phrase";
+        let phrase = decrypt(&Vec::from(source), b'I');
+        // Can derive encryption key using scoring algorithm.
+        assert_eq!(do_best_guess(Vec::from(phrase)).key.unwrap(), 'I');
     }
 }

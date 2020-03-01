@@ -24,7 +24,7 @@ fn guess_key_size(cipher: &Vec<u8>) -> Vec<u8> {
     }
     result.sort_by(|x, y| x.0.cmp(&y.0));
     // Return top three results.
-    result.iter().map(|x| x.1).take(3).collect::<Vec<u8>>()
+    result.iter().map(|x| x.1).take(6).collect::<Vec<u8>>()
 }
 
 fn main() {
@@ -65,7 +65,7 @@ fn main() {
                 c ^ *kv as u8
             })
             .collect();
-        // println!("{:?}", key);
-        println!("{}", String::from_utf8(text).unwrap_or("failed to parse".to_string()));
+        println!("{:?}", key);
+        // println!("{}", String::from_utf8(text).unwrap_or("failed to parse".to_string()));
     }
 }
