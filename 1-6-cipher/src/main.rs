@@ -7,11 +7,7 @@ fn guess_key_size(cipher: &Vec<u8>) -> Vec<u8> {
     let mut result = vec![];
     // Recommended key size range from challenge.
     for key_size in 2..=40 {
-        let first_chunk: Vec<u8> = cipher
-          .clone()
-          .into_iter()
-          .take(key_size)
-          .collect();
+        let first_chunk: Vec<u8> = cipher.clone().into_iter().take(key_size).collect();
         let second_chunk: Vec<u8> = cipher
             .clone()
             .into_iter()
@@ -50,7 +46,7 @@ fn main() {
             }
         }
         keys.push(key_guess);
-      }
+    }
 
     for key in keys {
         let mut cv = key.iter().cycle();

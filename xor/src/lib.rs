@@ -97,7 +97,7 @@ pub struct Guess {
 pub fn do_best_guess(phrase: Vec<u8>) -> Guess {
     // Not sure if the characters are limited to letters. Run through a wide range
     // of ascii characters.
-    let mut scores = vec!();
+    let mut scores = vec![];
     for c in b' '..=b'~' {
         let phrase = decrypt(&phrase, c);
         let s = score(phrase.as_str());
@@ -108,9 +108,9 @@ pub fn do_best_guess(phrase: Vec<u8>) -> Guess {
         });
     }
 
-    scores.sort_by(|a, b,| a.score.partial_cmp(&b.score).unwrap());
+    scores.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
     scores.last().unwrap().clone()
-  }
+}
 
 #[cfg(test)]
 mod tests {
