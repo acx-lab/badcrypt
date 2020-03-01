@@ -20,7 +20,7 @@ fn main() {
     let mut guesses = vec![];
     for line in ciphers.lines() {
         let buf = Vec::from_hex(line).unwrap();
-        guesses.push(xor::do_best_guess(buf));
+        guesses.push(xor::do_single_letter_key_speculation(buf));
     }
 
     for guess in guesses {

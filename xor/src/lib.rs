@@ -29,6 +29,7 @@ pub fn score(phrase: &str) -> f64 {
     for c in b'A'..=b'z' {
         freq.insert(char::from(c), 0);
     }
+    freq.insert(' ', 0);
 
     for c in phrase.to_lowercase().chars() {
         let e = freq.entry(c).or_insert(0);
@@ -64,6 +65,7 @@ pub fn score(phrase: &str) -> f64 {
             'x' => 0.17,
             'y' => 2.11,
             'z' => 0.07,
+            ' ' => 13.0,
             // Real messages have whitespace. This wasn't included in the character
             // frequency reference so I gave it a low-ish value.
             _ => continue,
@@ -76,15 +78,16 @@ pub fn score(phrase: &str) -> f64 {
 }
 
 /// Returns a decrypted message from a string buffer.
-pub fn decrypt(c: &Vec<u8>, key: u8) -> String {
-    let mut decrypted: Vec<u8> = vec![];
+pub fn decrypt(cipher: &Vec<u8>, key: &str) -> Vec<u8> {
+    let mut cv = key.as_bytes().iter().cycle();
 
-    for v in c {
-        decrypted.push(v ^ key);
-    }
-    // Some of the descrypted byte sequences don't produce valid utf-8 strings.
-    // Since it's a message we're looking for, this is a useful gate.
-    return String::from_utf8(decrypted).unwrap_or("".to_string());
+    return cipher
+        .iter()
+        .map(|c| {
+            let kv = cv.next().unwrap();
+            c ^ *kv as u8
+        })
+        .collect();
 }
 
 #[derive(Debug, Clone)]
@@ -94,15 +97,16 @@ pub struct Guess {
     pub key: char,
 }
 
-pub fn do_best_guess(phrase: Vec<u8>) -> Guess {
+pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
     // Not sure if the characters are limited to letters. Run through a wide range
     // of ascii characters.
     let mut scores = vec![];
     for c in b' '..=b'~' {
-        let phrase = decrypt(&phrase, c);
-        let s = score(phrase.as_str());
+        let phrase = decrypt(&phrase, String::from_utf8(vec!(c)).unwrap().as_str());
+        let encoded_phrase = String::from_utf8(phrase).unwrap();
+        let s = score(encoded_phrase.as_str());
         scores.push(Guess {
-            phrase,
+            phrase: encoded_phrase,
             score: s,
             key: char::from(c),
         });
@@ -110,6 +114,13 @@ pub fn do_best_guess(phrase: Vec<u8>) -> Guess {
 
     scores.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
     scores.last().unwrap().clone()
+}
+
+pub fn do_key_speculation(cipher: &Vec<u8>, key_size: usize) -> Vec<char> {
+    buffer::chunk_by_size(cipher, key_size)
+        .into_iter()
+        .map(|chunk| do_single_letter_key_speculation(chunk).key)
+        .collect()
 }
 
 #[cfg(test)]
@@ -131,23 +142,23 @@ mod tests {
     #[test]
     fn test_decrypt_is_reversible() {
         let source = "hello i am a fake phrase";
-        let phrase = decrypt(&Vec::from(source), b'z');
-        assert_eq!(decrypt(&Vec::from(phrase), b'z'), source);
+        let phrase = decrypt(&Vec::from(source), "z");
+        assert_eq!(decrypt(&Vec::from(phrase), "z"), source.as_bytes());
     }
 
     #[test]
     fn test_scoring_can_guess_key() {
         let source = "hello i am a fake phrase";
-        let phrase = decrypt(&Vec::from(source), b'z');
+        let phrase = decrypt(&Vec::from(source), "z");
         // Can derive encryption key using scoring algorithm.
-        assert_eq!(do_best_guess(Vec::from(phrase)).key, 'z');
+        assert_eq!(do_single_letter_key_speculation(Vec::from(phrase)).key, 'z');
     }
 
     #[test]
     fn test_scoring_can_guess_uppercase_key() {
         let source = "hello i am a FAKE phrase";
-        let phrase = decrypt(&Vec::from(source), b'I');
+        let phrase = decrypt(&Vec::from(source), "I");
         // Can derive encryption key using scoring algorithm.
-        assert_eq!(do_best_guess(Vec::from(phrase)).key, 'I');
+        assert_eq!(do_single_letter_key_speculation(Vec::from(phrase)).key, 'I');
     }
 }

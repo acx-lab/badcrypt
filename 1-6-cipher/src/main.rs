@@ -36,17 +36,11 @@ fn main() {
     let sizes = guess_key_size(&buf);
 
     // Guess a key based on the estimated size of the key. For each size, chunk
-    // the buffer by alternating bytes by the desired size.
+    //                F the buffer by alternating bytes by the desired size.
     let keys: Vec<Vec<char>> = sizes
-    .into_iter()
-    .map(|size| buffer::chunk_by_size(&buf, size as usize))
-    .map(|chunks| {
-        chunks
         .into_iter()
-        .map(|chunk| xor::do_best_guess(chunk).key)
-        .collect()
-    })
-    .collect();
+        .map(|size| xor::do_key_speculation(&buf, size as usize))
+        .collect();
 
     for key in keys {
         let mut cv = key.iter().cycle();
