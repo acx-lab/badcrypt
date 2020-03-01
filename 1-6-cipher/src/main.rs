@@ -31,20 +31,22 @@ fn main() {
     let mut cipher = String::new();
     f.read_to_string(&mut cipher).unwrap();
 
-    // Flatten the base64 cipher into a continuous string.
+    // Flatten the base64 cipher into a continuous string before decoding.
     let buf = base64::decode(cipher.replace("\n", "").as_str()).unwrap();
     let sizes = guess_key_size(&buf);
 
-    // Guess a key based on the estimated size of the key.
-    let mut keys: Vec<Vec<char>> = vec![];
-    for size in sizes {
-        let chunks = buffer::chunk_by_size(&buf, size as usize);
-        keys.push(chunks
-            .into_iter()
-            .map(|chunk| xor::do_best_guess(chunk).key)
-            .collect()
-        );
-    }
+    // Guess a key based on the estimated size of the key. For each size, chunk
+    // the buffer by alternating bytes by the desired size.
+    let keys: Vec<Vec<char>> = sizes
+    .into_iter()
+    .map(|size| buffer::chunk_by_size(&buf, size as usize))
+    .map(|chunks| {
+        chunks
+        .into_iter()
+        .map(|chunk| xor::do_best_guess(chunk).key)
+        .collect()
+    })
+    .collect();
 
     for key in keys {
         let mut cv = key.iter().cycle();
