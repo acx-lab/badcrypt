@@ -38,14 +38,12 @@ fn main() {
     // Guess a key based on the estimated size of the key.
     let mut keys: Vec<Vec<char>> = vec![];
     for size in sizes {
-        let mut key_guess = vec![];
-        for i in 0..(size as usize) {
-            let chunks = buffer::chunk_by_size(&buf, i);
-            for chunk in chunks {
-                key_guess.push(xor::do_best_guess(chunk).key);
-            }
-        }
-        keys.push(key_guess);
+        let chunks = buffer::chunk_by_size(&buf, size as usize);
+        keys.push(chunks
+            .into_iter()
+            .map(|chunk| xor::do_best_guess(chunk).key)
+            .collect()
+        );
     }
 
     for key in keys {
@@ -58,7 +56,7 @@ fn main() {
                 c ^ *kv as u8
             })
             .collect();
-        // println!("{:?}", key);
-        println!("{}", String::from_utf8(text).unwrap());
+        println!("{:?}", key);
+        // println!("{}", String::from_utf8(text).unwrap());
     }
 }
