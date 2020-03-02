@@ -29,58 +29,65 @@ pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u32 {
 pub fn score(phrase: &str) -> f64 {
     let mut freq: HashMap<char, i32> = HashMap::new();
 
-    for c in b'A'..=b'z' {
-        freq.insert(char::from(c), 0);
-    }
-    freq.insert(' ', 0);
+    let upper_count = phrase.chars()
+        .filter(|c| c.is_uppercase()).collect::<Vec<_>>().len();
 
-    let upper = phrase.chars().filter(|c| c.is_uppercase()).collect::<Vec<char>>().len();
+    let multiplier = if upper_count > phrase.len() / 2 {
+        0.5
+    } else {
+        1.0
+    };
+
     for c in phrase.to_lowercase().chars() {
-        let e = freq.entry(c).or_insert(0);
-        *e += 1;
+        match c {
+            'a'..='z' | ' ' => {
+                let e = freq.entry(c).or_insert(0);
+                *e += 1;
+            },
+            _ => {
+                let e = freq.entry('*').or_insert(0);
+                *e += 1;
+            },
+        }
     }
 
-    let mut score = f64::from(0);
-    for (k, v) in freq.iter() {
-        score += match k {
-            'a' => 8.12,
-            'b' => 1.49,
-            'c' => 2.71,
-            'd' => 4.32,
-            'e' => 12.02,
-            'f' => 2.30,
-            'g' => 2.03,
-            'h' => 5.92,
-            'i' => 7.31,
-            'j' => 0.10,
-            'k' => 0.69,
-            'l' => 3.98,
-            'm' => 2.61,
-            'n' => 6.95,
-            'o' => 7.68,
-            'p' => 1.82,
-            'q' => 0.11,
-            'r' => 6.02,
-            's' => 6.28,
-            't' => 9.10,
-            'u' => 2.88,
-            'v' => 1.11,
-            'w' => 2.09,
-            'x' => 0.17,
-            'y' => 2.11,
-            'z' => 0.07,
-            ' ' => 13.00,
-            _ => -5.00,
-        } * f64::from(*v);
-    }
-    // When a key is lowercase, the uppercase key tends to produce the same character
-    // distribution in uppercase. This heuristic heavily weights against results that
-    // produce more than half uppercase characters. Depending on the source being
-    // decrypted, this may be a reasonable choice or may not be.
-    if upper > (phrase.len() / 2) {
-        return score * 0.9;
-    }
-    score
+    let hist = freq.into_iter()
+        .map(|(k, v)| {
+            let expected_freq = match k {
+                'a' => 8.12,
+                'b' => 1.49,
+                'c' => 2.71,
+                'd' => 4.32,
+                'e' => 12.02,
+                'f' => 2.30,
+                'g' => 2.03,
+                'h' => 5.92,
+                'i' => 7.31,
+                'j' => 0.10,
+                'k' => 0.69,
+                'l' => 3.98,
+                'm' => 2.61,
+                'n' => 6.95,
+                'o' => 7.68,
+                'p' => 1.82,
+                'q' => 0.11,
+                'r' => 6.02,
+                's' => 6.28,
+                't' => 9.10,
+                'u' => 2.88,
+                'v' => 1.11,
+                'w' => 2.09,
+                'x' => 0.17,
+                'y' => 2.11,
+                'z' => 0.07,
+                ' ' => 13.00,
+                '*' => 0.5,
+                _ => panic!("how did this get through"),
+            } * 0.01;
+            (k, (expected_freq - (v / phrase.len() as i32) as f64).abs())
+        })
+        .collect::<HashMap<char, f64>>();
+    hist.into_iter().map(|(_, v)| v).sum::<f64>() * multiplier
 }
 
 /// Returns a decrypted message from a string buffer.
@@ -107,7 +114,7 @@ pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
     // Not sure if the characters are limited to letters. Run through a wide range
     // of ascii characters.
     let mut scores = vec![];
-    for c in b' '..=b'~' {
+    for c in b'A'..=b'z' {
         let phrase = decrypt(&phrase, String::from_utf8(vec![c]).unwrap().as_str());
         let encoded_phrase = String::from_utf8(phrase).unwrap();
         let s = score(encoded_phrase.as_str());

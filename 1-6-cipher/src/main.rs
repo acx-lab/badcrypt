@@ -58,7 +58,7 @@ fn main() {
         let key: String = key.iter().collect();
         // Decipher original text.
         let decrypted = xor::decrypt(&buf, key.as_str());
-        println!("{:?}", key);
-        // println!("{}", String::from_utf8(decrypted).unwrap());
+        // println!("{:?}", key);
+        println!("{}", String::from_utf8(decrypted).unwrap());
     }
 }
