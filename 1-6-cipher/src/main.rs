@@ -30,7 +30,11 @@ fn guess_key_size(cipher: &Vec<u8>) -> Vec<u8> {
         let dist1 = xor::hamming_distance(first_chunk.clone(), second_chunk) / key_size as u32;
         let dist2 = xor::hamming_distance(first_chunk.clone(), third_chunk) / key_size as u32;
         let dist3 = xor::hamming_distance(first_chunk.clone(), fourth_chunk) / key_size as u32;
-        let mean = vec!(dist1, dist2, dist3).into_iter().map(f64::from).sum::<f64>() / f64::from(3);
+        let mean = vec![dist1, dist2, dist3]
+            .into_iter()
+            .map(f64::from)
+            .sum::<f64>()
+            / f64::from(3);
         result.push((mean, key_size as u8));
     }
     result.sort_by(|x, y| x.0.partial_cmp(&y.0).unwrap());
@@ -55,7 +59,7 @@ fn main() {
         .map(|size| xor::do_key_speculation(&buf, size as usize))
         .collect();
 
-    let mut results = vec!();
+    let mut results = vec![];
     for key in keys {
         let key: String = key.iter().collect();
         // Decipher original text.
@@ -66,5 +70,8 @@ fn main() {
         ));
     }
     results.sort_by(|x, y| x.0.cmp(&y.0));
-    println!("{}", String::from_utf8(results.first().unwrap().1.clone()).unwrap());
+    println!(
+        "{}",
+        String::from_utf8(results.first().unwrap().1.clone()).unwrap()
+    );
 }

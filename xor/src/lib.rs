@@ -29,17 +29,16 @@ pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u32 {
 pub fn score(phrase: &str) -> u64 {
     let mut freq: HashMap<char, i32> = HashMap::new();
 
-    let upper_count = phrase.chars()
-        .filter(|c| c.is_uppercase()).collect::<Vec<_>>().len();
+    let upper_count = phrase
+        .chars()
+        .filter(|c| c.is_uppercase())
+        .collect::<Vec<_>>()
+        .len();
 
     // FIXME(allancalix): This is a hack to bias against data decrypted with
     // an abnormal amount of capital letters. This can happen because the same key,
     // (i.e. 'i' and 'I') can xor to the same character with opposite casing.
-    let multiplier = if upper_count > phrase.len() / 2 {
-        2
-    } else {
-        1
-    };
+    let multiplier = if upper_count > phrase.len() / 2 { 2 } else { 1 };
 
     // Init frequency map "buckets". This ensures that a character with no characters
     // is still counted against for having a distribution of 0%.
@@ -52,15 +51,16 @@ pub fn score(phrase: &str) -> u64 {
             'a'..='z' | ' ' => {
                 let e = freq.entry(c).or_insert(0);
                 *e += 1;
-            },
+            }
             _ => {
                 let e = freq.entry('*').or_insert(0);
                 *e += 1;
-            },
+            }
         }
     }
 
-    let hist = freq.into_iter()
+    let hist = freq
+        .into_iter()
         .map(|(k, v)| {
             let expected_freq = match k {
                 'a' => 8.12,
