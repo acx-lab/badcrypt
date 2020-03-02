@@ -84,7 +84,7 @@ pub fn score(phrase: &str) -> u64 {
                 'x' => 0.17,
                 'y' => 2.11,
                 'z' => 0.07,
-                ' ' => 13.00,
+                ' ' => 13.0,
                 // Any other characters bias against overall score.
                 '*' => 0.0,
                 _ => panic!("how did this get through"),
@@ -122,7 +122,7 @@ pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
     // Not sure if the characters are limited to letters. Run through a wide range
     // of ascii characters.
     let mut scores = vec![];
-    for c in b'A'..=b'z' {
+    for c in b' '..=b'~' {
         let phrase = decrypt(&phrase, String::from_utf8(vec![c]).unwrap().as_str());
         let encoded_phrase = String::from_utf8(phrase).unwrap();
         let s = score(encoded_phrase.as_str());

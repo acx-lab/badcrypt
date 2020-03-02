@@ -34,12 +34,13 @@ fn guess_key_size(cipher: &Vec<u8>) -> Vec<u8> {
     }
     result.sort_by(|x, y| x.0.partial_cmp(&y.0).unwrap());
     // Return top three results.
-    result.iter().map(|x| x.1).take(3).collect::<Vec<u8>>()
+    result.iter().map(|x| x.1).skip(6).take(1).collect::<Vec<u8>>()
 }
 
 fn main() {
     let p: Vec<String> = env::args().collect();
     let cipher_file = Path::new(p.get(1).unwrap().as_str());
+    let size = p.get(2).unwrap().parse::<i32>().unwrap();
     let mut f = File::open(cipher_file).unwrap();
 
     let mut cipher = String::new();
@@ -47,7 +48,8 @@ fn main() {
 
     // Flatten the base64 cipher into a continuous string before decoding.
     let buf = base64::decode(cipher.replace("\n", "").as_str()).unwrap();
-    let sizes = guess_key_size(&buf);
+    let sizes = vec!(size);
+    // let sizes = guess_key_size(&buf);
 
     let keys: Vec<Vec<char>> = sizes
         .into_iter()
@@ -58,7 +60,6 @@ fn main() {
         let key: String = key.iter().collect();
         // Decipher original text.
         let decrypted = xor::decrypt(&buf, key.as_str());
-        // println!("{:?}", key);
         println!("{}", String::from_utf8(decrypted).unwrap());
     }
 }
