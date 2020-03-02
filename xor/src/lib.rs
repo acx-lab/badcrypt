@@ -87,7 +87,7 @@ pub fn score(phrase: &str) -> u64 {
                 ' ' => 13.0,
                 // Any other characters bias against overall score.
                 '*' => 0.0,
-                _ => panic!("how did this get through"),
+                _ => panic!("This should never happen, non letter characters should be *."),
             } * 0.01;
             let real_freq = v as f64 / phrase.len() as f64;
             let distance = (expected_freq - real_freq).abs();
