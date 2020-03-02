@@ -68,12 +68,11 @@ pub fn score(phrase: &str) -> f64 {
             'x' => 0.17,
             'y' => 2.11,
             'z' => 0.07,
-            ' ' => 13.00,
+            ' ' => 1.00,
             _ => continue,
         } / f64::from(100);
         let real_freq = f64::from(*v) / phrase.len() as f64;
-        let distance = expected_freq - real_freq;
-        score += distance;
+        score += expected_freq - real_freq;
     }
     f64::from(1) / (score * 100 as f64)
 }
@@ -114,6 +113,8 @@ pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
     }
 
     scores.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
+    let t: Vec<&Guess> = scores.iter().skip(91).collect();
+    println!("{:?}", t);
     scores.last().unwrap().clone()
 }
 
@@ -169,5 +170,13 @@ mod tests {
         const CIPHER: &'static str = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
         let key = do_key_speculation(&Vec::from_hex(CIPHER).unwrap(), 3);
         assert_eq!(key.into_iter().collect::<String>().as_str(), "ICE");
+    }
+
+    #[test]
+    fn test_do_key_speculation_with_encryption() {
+        const CIPHER: &'static str = "Hello, I am a secret encoded message. Find the key!";
+        let c = decrypt(&Vec::from(CIPHER), "NiInfp");
+        let key = do_key_speculation(&c, 6);
+        assert_eq!(key.into_iter().collect::<String>().as_str(), "NiInfp");
     }
 }

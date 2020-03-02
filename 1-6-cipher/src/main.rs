@@ -20,7 +20,7 @@ fn guess_key_size(cipher: &Vec<u8>) -> Vec<u8> {
     }
     result.sort_by(|x, y| x.0.cmp(&y.0));
     // Return top three results.
-    result.iter().map(|x| x.1).take(6).collect::<Vec<u8>>()
+    result.iter().map(|x| x.1).take(3).collect::<Vec<u8>>()
 }
 
 fn main() {
@@ -43,16 +43,10 @@ fn main() {
         .collect();
 
     for key in keys {
-        let mut cv = key.iter().cycle();
+        let key_str: String = key.iter().collect();
         // Decipher original text.
-        let text: Vec<u8> = buf
-            .iter()
-            .map(|c| {
-                let kv = cv.next().unwrap();
-                c ^ *kv as u8
-            })
-            .collect();
-        // println!("{:?}", key);
-        println!("{}", String::from_utf8(text).unwrap());
+        let decrypted = xor::decrypt(&buf, key_str.as_str());
+        println!("{:?}", key);
+        println!("{}", String::from_utf8(decrypted).unwrap());
     }
 }
