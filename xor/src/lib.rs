@@ -1,4 +1,7 @@
+extern crate encode;
+
 use std::collections::HashMap;
+use encode::FromHex;
 
 /// Count the number of bits that differ between two sequence of bytes.
 pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u8 {
@@ -65,16 +68,14 @@ pub fn score(phrase: &str) -> f64 {
             'x' => 0.17,
             'y' => 2.11,
             'z' => 0.07,
-            ' ' => 13.0,
-            // Real messages have whitespace. This wasn't included in the character
-            // frequency reference so I gave it a low-ish value.
+            ' ' => 13.00,
             _ => continue,
         } / f64::from(100);
-        let real_freq = f64::from(*v) / f64::from(phrase.len() as i32);
-        let distance = (expected_freq - real_freq).abs();
+        let real_freq = f64::from(*v) / phrase.len() as f64;
+        let distance = expected_freq - real_freq;
         score += distance;
     }
-    f64::from(1) - score
+    f64::from(1) / (score * 100 as f64)
 }
 
 /// Returns a decrypted message from a string buffer.
@@ -160,5 +161,13 @@ mod tests {
         let phrase = decrypt(&Vec::from(source), "I");
         // Can derive encryption key using scoring algorithm.
         assert_eq!(do_single_letter_key_speculation(Vec::from(phrase)).key, 'I');
+    }
+
+    #[test]
+    fn test_do_key_speculation() {
+        // Encrypted with "ICE" from cryptopals 1.5.
+        const CIPHER: &'static str = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+        let key = do_key_speculation(&Vec::from_hex(CIPHER).unwrap(), 3);
+        assert_eq!(key.into_iter().collect::<String>().as_str(), "ICE");
     }
 }
