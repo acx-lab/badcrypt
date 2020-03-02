@@ -26,18 +26,22 @@ pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u32 {
 /// the more the frequencies align with the expected distribution.
 ///
 /// http://pi.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html
-pub fn score(phrase: &str) -> f64 {
+pub fn score(phrase: &str) -> u64 {
     let mut freq: HashMap<char, i32> = HashMap::new();
 
     let upper_count = phrase.chars()
         .filter(|c| c.is_uppercase()).collect::<Vec<_>>().len();
 
     let multiplier = if upper_count > phrase.len() / 2 {
-        0.5
+        2
     } else {
-        1.0
+        1
     };
 
+    for c in b'a'..b'z' {
+        freq.insert(char::from(c), 0);
+    }
+    freq.insert(' ', 0);
     for c in phrase.to_lowercase().chars() {
         match c {
             'a'..='z' | ' ' => {
@@ -81,13 +85,16 @@ pub fn score(phrase: &str) -> f64 {
                 'y' => 2.11,
                 'z' => 0.07,
                 ' ' => 13.00,
-                '*' => 0.5,
+                '*' => 0.0,
                 _ => panic!("how did this get through"),
             } * 0.01;
-            (k, (expected_freq - (v / phrase.len() as i32) as f64).abs())
+            let real_freq = v as f64 / phrase.len() as f64;
+            let distance = (expected_freq - real_freq).abs();
+            let score = (distance * f64::from(1000)) as u64;
+            (k, score)
         })
-        .collect::<HashMap<char, f64>>();
-    hist.into_iter().map(|(_, v)| v).sum::<f64>() * multiplier
+        .collect::<HashMap<char, u64>>();
+    hist.into_iter().map(|(_, v)| v).sum::<u64>() * multiplier
 }
 
 /// Returns a decrypted message from a string buffer.
@@ -106,7 +113,7 @@ pub fn decrypt(cipher: &Vec<u8>, key: &str) -> Vec<u8> {
 #[derive(Debug, Clone)]
 pub struct Guess {
     pub phrase: String,
-    pub score: f64,
+    pub score: u64,
     pub key: char,
 }
 
@@ -126,6 +133,7 @@ pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
     }
 
     scores.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
+    scores.reverse();
     scores.last().unwrap().clone()
 }
 
