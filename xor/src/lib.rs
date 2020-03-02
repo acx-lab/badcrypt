@@ -4,7 +4,7 @@ use encode::FromHex;
 use std::collections::HashMap;
 
 /// Count the number of bits that differ between two sequence of bytes.
-pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u8 {
+pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u32 {
     let mut distance = 0;
     for (i, x) in first.iter().enumerate() {
         // FIXME(allancalix): Fails if the two bytes are not equal in length. It
@@ -13,7 +13,7 @@ pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u8 {
         let y = second.get(i).unwrap();
         let mut diff = x ^ y;
         for _ in 0..8 {
-            distance += diff & 1;
+            distance += (diff & 1) as u32;
             diff >>= 1;
         }
     }
@@ -34,6 +34,7 @@ pub fn score(phrase: &str) -> f64 {
     }
     freq.insert(' ', 0);
 
+    let upper = phrase.chars().filter(|c| c.is_uppercase()).collect::<Vec<char>>().len();
     for c in phrase.to_lowercase().chars() {
         let e = freq.entry(c).or_insert(0);
         *e += 1;
@@ -41,7 +42,7 @@ pub fn score(phrase: &str) -> f64 {
 
     let mut score = f64::from(0);
     for (k, v) in freq.iter() {
-        let expected_freq = match k {
+        score += match k {
             'a' => 8.12,
             'b' => 1.49,
             'c' => 2.71,
@@ -68,13 +69,18 @@ pub fn score(phrase: &str) -> f64 {
             'x' => 0.17,
             'y' => 2.11,
             'z' => 0.07,
-            ' ' => 1.00,
-            _ => continue,
-        } / f64::from(100);
-        let real_freq = f64::from(*v) / phrase.len() as f64;
-        score += expected_freq - real_freq;
+            ' ' => 13.00,
+            _ => -5.00,
+        } * f64::from(*v);
     }
-    f64::from(1) / (score * 100 as f64)
+    // When a key is lowercase, the uppercase key tends to produce the same character
+    // distribution in uppercase. This heuristic heavily weights against results that
+    // produce more than half uppercase characters. Depending on the source being
+    // decrypted, this may be a reasonable choice or may not be.
+    if upper > (phrase.len() / 2) {
+        return score * 0.9;
+    }
+    score
 }
 
 /// Returns a decrypted message from a string buffer.
@@ -113,8 +119,6 @@ pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
     }
 
     scores.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
-    let t: Vec<&Guess> = scores.iter().skip(91).collect();
-    println!("{:?}", t);
     scores.last().unwrap().clone()
 }
 
