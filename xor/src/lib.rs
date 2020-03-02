@@ -38,7 +38,7 @@ pub fn score(phrase: &str) -> u64 {
         1
     };
 
-    for c in b'a'..b'z' {
+    for c in b'a'..=b'z' {
         freq.insert(char::from(c), 0);
     }
     freq.insert(' ', 0);
@@ -85,6 +85,7 @@ pub fn score(phrase: &str) -> u64 {
                 'y' => 2.11,
                 'z' => 0.07,
                 ' ' => 13.00,
+                // Any other characters bias against overall score.
                 '*' => 0.0,
                 _ => panic!("how did this get through"),
             } * 0.01;
