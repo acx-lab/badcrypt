@@ -1,7 +1,7 @@
 extern crate encode;
 
-use std::collections::HashMap;
 use encode::FromHex;
+use std::collections::HashMap;
 
 /// Count the number of bits that differ between two sequence of bytes.
 pub fn hamming_distance(first: Vec<u8>, second: Vec<u8>) -> u8 {
