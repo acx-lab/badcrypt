@@ -14,9 +14,11 @@ fn main() {
     f.read_to_string(&mut cipher).unwrap();
     let buf = base64::decode(cipher.replace("\n", "").as_str()).unwrap();
     let message = openssl::symm::decrypt(
-      openssl::symm::Cipher::aes_128_ecb(),
-      KEY.as_bytes(),
-      None,
-      &buf).unwrap();
+        openssl::symm::Cipher::aes_128_ecb(),
+        KEY.as_bytes(),
+        None,
+        &buf,
+    )
+    .unwrap();
     println!("{}", String::from_utf8(message).unwrap())
 }
