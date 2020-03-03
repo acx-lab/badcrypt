@@ -129,7 +129,7 @@ pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
     let mut scores = vec![];
     for c in b' '..=b'~' {
         let phrase = decrypt(&phrase, String::from_utf8(vec![c]).unwrap().as_str());
-        let encoded_phrase = String::from_utf8(phrase).unwrap();
+        let encoded_phrase = String::from_utf8(phrase).unwrap_or("zzzzzzzzzzzzzzzz".to_string());
         let s = score(encoded_phrase.as_str());
         scores.push(Guess {
             phrase: encoded_phrase,
@@ -140,6 +140,9 @@ pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
 
     scores.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
     scores.reverse();
+    let t = scores.iter().skip(55).collect::<Vec<&Guess>>();
+    println!("{:?}", t);
+    unimplemented!();
     scores.last().unwrap().clone()
 }
 

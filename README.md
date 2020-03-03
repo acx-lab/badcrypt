@@ -53,3 +53,12 @@ cargo run --bin 1-4-cipher -- data/1-4-cipher.txt | sort --reverse | head -n 1
 This was straight forward, XOR each byte with a cycling character in the key _ICE_.
 The code on this one is concise thanks to rust iterators, specifically the cycling
 iterator to hash the source masterial against.
+
+## 1.6 - Break repeating-key XOR
+TODO(allancalix): Fill me in.
+
+## 1.7 - AES in ECB mode
+TODO(allancalix): Fill me in.
+
+## 1.8 - Detect AES in ECB mode
+TODO(allancalix): Fill me in.

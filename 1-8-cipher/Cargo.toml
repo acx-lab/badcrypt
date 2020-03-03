@@ -1,0 +1,14 @@
+[package]
+name = "1-8-cipher"
+version = "0.0.0"
+
+[[bin]]
+name = "1-8-cipher"
+path = "./src/main.rs"
+
+[dependencies]
+encode = { path = "../encode" }
+xor = { path = "../xor" }
+buffer = { path = "../buffer" }
+openssl = { version = "0.10" }
+hex = "*"
