@@ -52,13 +52,83 @@ cargo run --bin 1-4-cipher -- data/1-4-cipher.txt | sort --reverse | head -n 1
 
 This was straight forward, XOR each byte with a cycling character in the key _ICE_.
 The code on this one is concise thanks to rust iterators, specifically the cycling
-iterator to hash the source masterial against.
+iterator to hash the source material against.
 
 ## 1.6 - Break repeating-key XOR
-TODO(allancalix): Fill me in.
+
+This challenge exposed several weaknesses in the scoring algorithm developed in
+the previous challenge. Specifically, I assigned _points_ to a sequence of characters that scaled based on the frequency of that letter. For example, the
+letter "e" would earn a phrase 12 points, the letter "t" would earn 8 points, and
+so on and so forth.
+
+This approach worked okay where frequencies were below or equal to expected frequencies but broke down when frequencies were greater than expected.
+
+To account for this I adjusted the scoring algorithm to calculate the _real_
+frequency of each letter and measured the distance from the expected frequency
+to the observed frequency.
+
+For example, given the phrase "hello", the frequency of the letter "e" would be
+one out of five, or 20%. Given an expected frequency of 12% this means the phrase
+would score 12 - 20, so -8. Finally, I normalized the distances by taking the absolute value of the of the distance.
+
+After doing this for each letter in the alphabet I have a score which reflects
+the distance from expected letter frequency. My assumption is that more _English-y_
+phrases would score lower (i.e. closer to the expected distribution.)
+
+This implementation was better but still had problems. Most significantly, uppercase
+versions of lowercase keys would often produce identical character distributions
+of all uppercase keys. For the sake of time, I settled for coding in heuristics
+to bias against sets of characters with more than half uppercase characters.
+
+Another heuristic in the algorithm biases against character sets with a large number of non-alphabet characters. By setting the expected frequency of non-letter characters, the the more symbol or number type characters that appeared the worse
+the score.
+
+With a couple heuristics and a distribution based scoring algorithm I was able
+to decrypt the cipher.
+
+This problem set highlighted the value of selecting a representative test set for
+algorithms. Creating a test set around scoring allowed for incremental improvements
+that eventually lead to a "good enough" result.
 
 ## 1.7 - AES in ECB mode
-TODO(allancalix): Fill me in.
+This challenge was simple thanks to the rust bindings for openssl.
+```rust
+    let message = openssl::symm::decrypt(
+        // Specified encryption scheme.
+        openssl::symm::Cipher::aes_128_ecb(),
+        // The decryption key, provided.
+        KEY.as_bytes(),
+        // Initialization vector, not used in this case.
+        None,
+        // The cipher buffer.
+        &buf,
+    )
+```
 
 ## 1.8 - Detect AES in ECB mode
-TODO(allancalix): Fill me in.
+
+This problem highlights a key vulnerability of ECB mode encryption. Ciphers created
+in ECB mode, short for "electronic cookbook", expose patterns in the encrypted
+material.
+
+My first thought was to break each hex-encoded buffer into blocks of 16 bytes,
+align the bytes by index, and then score the buffers with our scoring algorithm.
+AES is more complex than our simple XOR encryption and does a much better job of
+creating distance from the encrypted byte.
+
+I still felt I was on to something. Aligning each byte corresponding to the encryption key value must manifest some pattern. I would expect text to contain
+repeated letters, therefore, I expect the cipher text of that source material to
+contain repeated bytes.
+
+My next approach was to align the bytes again but this time just count the number of
+duplicate bytes per chunk, sum that number, and expect the buffer that contains the
+most repeated bytes to be the AES encrypted buffer.
+
+This approach worked and led to an observation. The more assumptions I can make about the exncrypted data, the easier it is to exploit it's security. Exceptions
+and special cases are generally avoided in application design, in this case, it
+can provide bounds on the chaos of bytes.
+
+We'll see how well this holds up in future challenges, and notably, designing
+better test cases was more productive than tuning magic numbers.
+
+# Set 2  - Block Crypto
