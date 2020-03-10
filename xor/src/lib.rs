@@ -140,9 +140,6 @@ pub fn do_single_letter_key_speculation(phrase: Vec<u8>) -> Guess {
 
     scores.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
     scores.reverse();
-    let t = scores.iter().skip(55).collect::<Vec<&Guess>>();
-    println!("{:?}", t);
-    unimplemented!();
     scores.last().unwrap().clone()
 }
 
