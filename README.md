@@ -1,6 +1,6 @@
 # Badcrypt
 
-Bad and unsafe implementations of crytopals challenges.
+Bad implementations of crytopals challenges.
 
 # Set 1 - Basics
 
@@ -142,4 +142,37 @@ Not much to say on this one.
 
 ```sh
 cargo run --bin 2-1-solution -- 'YELLOW SUBMARINE'
+```
+
+## 2.2 - Implement CBC mode
+
+I learned my lesson about shooting from the hip in my implementation and started with some basic tests
+for encrypting and decrypting my own sources. This was very helpful and this challenge
+overall was straight forward.
+
+The major hang ups here came from misunderstanding implementation details in the `openssl`
+crate.
+
+The first peculiar thing is that although you are encrypting a block at time,
+you __must__ pass a buffer that is the length of content being encrypted _plus_ the block
+size (in this case 128 bits). It's not documented why the api requires this, I'm willing
+to bet it's an artifact of the underlying C implementation — namely that C requires
+an extra byte at the end for null byte termination of arrays. This resulted in writing some
+clumsy code that overallocates a mutable slice and then truncates it, seemingly
+for no reason.
+
+The second confusing part was entirely the result of not reading documentation carefully.
+By default, the symmetric encryption options in the rust crate pad the content
+being encrypted/decrypted. This led to unexpected cipher lengths and just a mess
+overall.
+
+Working with the non-idiomatic openssl library became easier when I made liberal
+use of `assert!` macros to sanity check results.
+
+The CBC implementation itself is simple and improves security on encrypted text
+that is longer than one block. CBC adds no additional security for single block
+ciphers because the encryption process at one block is identical.
+
+```sh
+cargo run --bin 2-2-solution -- data/2-2-b64-cipher.txt
 ```
