@@ -132,3 +132,14 @@ We'll see how well this holds up in future challenges, and notably, designing
 better test cases was more productive than tuning magic numbers.
 
 # Set 2  - Block Crypto
+
+## 2.1 - Implement PKCS#7 Padding
+
+This one was too easy for comfort. It's a little unclear without a given cipher to break what The expected outcome should be. I implemented a function that pads buffers to a uniform size by appending as many `\x04`
+characters as needed.
+
+Not much to say on this one.
+
+```sh
+cargo run --bin 2-1-solution -- 'YELLOW SUBMARINE'
+```

@@ -1,3 +1,5 @@
+pub mod padding;
+
 pub trait FromHex: Sized {
     type Error;
 
