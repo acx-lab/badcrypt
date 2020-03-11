@@ -3,6 +3,7 @@ extern crate openssl;
 
 pub mod cbc;
 
+
 use encode::FromHex;
 use std::collections::HashMap;
 
@@ -35,8 +36,7 @@ pub fn score(phrase: &str) -> u64 {
     let upper_count = phrase
         .chars()
         .filter(|c| c.is_uppercase())
-        .collect::<Vec<_>>()
-        .len();
+        .count();
 
     // FIXME(allancalix): This is a hack to bias against data decrypted with
     // an abnormal amount of capital letters. This can happen because the same key,
@@ -110,13 +110,13 @@ pub fn score(phrase: &str) -> u64 {
 pub fn decrypt(cipher: &Vec<u8>, key: &str) -> Vec<u8> {
     let mut cv = key.as_bytes().iter().cycle();
 
-    return cipher
+    cipher
         .iter()
         .map(|c| {
             let kv = cv.next().unwrap();
             c ^ *kv as u8
         })
-        .collect();
+        .collect()
 }
 
 #[derive(Debug, Clone)]

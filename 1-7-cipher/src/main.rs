@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
-const KEY: &'static str = "YELLOW SUBMARINE";
+const KEY: &str = "YELLOW SUBMARINE";
 
 fn main() {
     let p: Vec<String> = env::args().collect();

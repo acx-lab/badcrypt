@@ -68,7 +68,7 @@ impl Base64 {
 
 impl From<Vec<u8>> for Base64 {
     fn from(v: Vec<u8>) -> Self {
-        Base64(v.clone())
+        Base64(v)
     }
 }
 

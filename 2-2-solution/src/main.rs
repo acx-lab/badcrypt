@@ -1,7 +1,7 @@
 extern crate xor;
 use std::env;
 use std::fs::read_to_string;
-use std::io::prelude::*;
+
 use std::path::Path;
 use xor::cbc;
 

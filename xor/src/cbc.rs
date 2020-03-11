@@ -58,13 +58,13 @@ pub fn decrypt(cipher: &[u8], key: &[u8]) -> Vec<u8> {
 pub fn xor(cipher: &[u8], key: &[u8]) -> Vec<u8> {
     let mut cv = key.iter().cycle();
 
-    return cipher
+    cipher
         .iter()
         .map(|c| {
             let kv = cv.next().unwrap();
             c ^ *kv as u8
         })
-        .collect();
+        .collect()
 }
 
 #[cfg(test)]
