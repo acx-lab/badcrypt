@@ -1,10 +1,10 @@
-pub fn pkcs7(cipher: &[u8], block_size: u8) -> Vec<u8> {
-    let distance = cipher.len() % block_size as usize;
+pub fn pkcs7(cipher: &[u8], block_size: usize) -> Vec<u8> {
+    let distance = cipher.len() % block_size;
     if distance == 0 {
         return Vec::from(cipher);
     }
 
-    let padding = block_size as usize - distance;
+    let padding = block_size - distance;
     let mut padded_cipher = Vec::from(cipher);
     padded_cipher.extend_from_slice(vec![b'\x04'; padding].as_slice());
 
@@ -36,6 +36,14 @@ mod tests {
         let test = b"YELLOW SUBMARINE YELLOW SUBMARINE YELLOW";
         let padded_block = pkcs7(test, 40);
         assert_eq!(padded_block.len(), 40);
+        assert!(!padded_block.contains(&b'\x04'));
+    }
+
+    #[test]
+    fn test_pkcs7_nopad_matching_single_blocksize() {
+        let test = b"YELLOW SUBMARINE";
+        let padded_block = pkcs7(test, 16);
+        assert_eq!(padded_block.len(), 16);
         assert!(!padded_block.contains(&b'\x04'));
     }
 }

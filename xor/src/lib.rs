@@ -1,4 +1,7 @@
 extern crate encode;
+extern crate openssl;
+
+pub mod cbc;
 
 use encode::FromHex;
 use std::collections::HashMap;

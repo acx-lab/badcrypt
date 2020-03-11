@@ -6,3 +6,4 @@ authors = ["Allan Calix <contact@allancalix.com>"]
 [dependencies]
 "encode" = { "path" = "../encode" }
 "buffer" = { "path" = "../buffer" }
+openssl = { version = "0.10" }
