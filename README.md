@@ -1,6 +1,10 @@
 # Badcrypt
 
-Bad implementations of crytopals challenges.
+Bad implementations of [crytopals](https://cryptopals.com/) challenges.
+
+I'm by no means a rust expert, but I attempt to be idiomatic where possible. My
+focus is on being a practical as I can, choosing to duplicate code or write one-off
+hacks in the interest of focusing on the challenges themselves.
 
 # Set 1 - Basics
 
