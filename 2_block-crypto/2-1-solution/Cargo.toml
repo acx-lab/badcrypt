@@ -7,4 +7,4 @@ name = "2-1-solution"
 path = "./src/main.rs"
 
 [dependencies]
-encode = { path = "../encode" }
+encode = { path = "../../crates/encode" }

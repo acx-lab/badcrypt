@@ -7,8 +7,8 @@ name = "1-8-cipher"
 path = "./src/main.rs"
 
 [dependencies]
-encode = { path = "../encode" }
-xor = { path = "../xor" }
-buffer = { path = "../buffer" }
+encode = { path = "../../crates/encode" }
+xor = { path = "../../crates/xor" }
+buffer = { path = "../../crates/buffer" }
 openssl = { version = "0.10" }
 hex = "*"

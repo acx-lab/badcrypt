@@ -7,5 +7,5 @@ name = "2-2-solution"
 path = "./src/main.rs"
 
 [dependencies]
-xor = { path = "../xor" }
+xor = { path = "../../crates/xor" }
 base64 = "0.11.0"

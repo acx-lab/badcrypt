@@ -7,5 +7,5 @@ name = "1-3-cipher"
 path = "./src/main.rs"
 
 [dependencies]
-encode = { path = "../encode" }
-xor = { path = "../xor" }
+encode = { path = "../../crates/encode" }
+xor = { path = "../../crates/xor" }

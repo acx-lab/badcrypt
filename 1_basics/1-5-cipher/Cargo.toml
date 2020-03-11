@@ -7,5 +7,5 @@ name = "1-5-cipher"
 path = "./src/main.rs"
 
 [dependencies]
-encode = { path = "../encode" }
+encode = { path = "../../crates/encode" }
 hex = "*"

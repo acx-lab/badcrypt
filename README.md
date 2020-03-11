@@ -35,6 +35,10 @@ I found a table online showing the frequency of each letter in a 40,000 word cor
 so I naively just applied those frequencies as a score. The highest score wins
 and fortunately this was enough to get the answer.
 
+```sh
+cargo run --bin 1-3-cipher
+```
+
 ## 1.4 - Detect single-character XOR
 
 This was a progression of the previous problem with alot more noise than signal.
@@ -57,6 +61,10 @@ cargo run --bin 1-4-cipher -- data/1-4-cipher.txt | sort --reverse | head -n 1
 This was straight forward, XOR each byte with a cycling character in the key _ICE_.
 The code on this one is concise thanks to rust iterators, specifically the cycling
 iterator to hash the source material against.
+
+```sh
+cargo run --bin 1-5-cipher
+```
 
 ## 1.6 - Break repeating-key XOR
 
@@ -94,6 +102,10 @@ This problem set highlighted the value of selecting a representative test set fo
 algorithms. Creating a test set around scoring allowed for incremental improvements
 that eventually lead to a "good enough" result.
 
+```
+cargo run --bin 1-6-cipher -- data/1-6-b64-cipher.txt
+```
+
 ## 1.7 - AES in ECB mode
 This challenge was simple thanks to the rust bindings for openssl.
 ```rust
@@ -107,6 +119,10 @@ This challenge was simple thanks to the rust bindings for openssl.
         // The cipher buffer.
         &buf,
     )
+```
+
+```sh
+cargo run --bin 1-7-cipher -- data/1-7-b64-cipher.txt
 ```
 
 ## 1.8 - Detect AES in ECB mode
@@ -134,6 +150,10 @@ can provide bounds on the chaos of bytes.
 
 We'll see how well this holds up in future challenges, and notably, designing
 better test cases was more productive than tuning magic numbers.
+
+```sh
+cargo run --bin 1-8-cipher -- data/1-8-cipher.txt
+```
 
 # Set 2  - Block Crypto
 
