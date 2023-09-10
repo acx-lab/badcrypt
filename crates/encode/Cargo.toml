@@ -1,7 +1,0 @@
-[package]
-name = "encode"
-version = "0.0.1"
-authors = ["Allan Calix <contact@allancalix.com>"]
-
-[dependencies]
-hex = "0.4.2"
