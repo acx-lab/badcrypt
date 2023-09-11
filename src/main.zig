@@ -2,6 +2,17 @@ const std = @import("std");
 const assert = std.debug.assert;
 const testing = std.testing;
 
+pub fn xor_slices(a: []const u8, b: []const u8, dest: []u8) []const u8 {
+    assert(a.len == b.len);
+    assert(a.len <= dest.len);
+
+    for (a, b, 0..) |an, bn, i| {
+        dest[i] = an ^ bn;
+    }
+
+    return dest[0..a.len];
+}
+
 /// Decodes a hex string into a given byte slice. The byte slice must be at least
 /// half the length of the hex string.
 pub fn decode_hex(hex: []const u8, dest: []u8) !void {
@@ -24,9 +35,9 @@ pub fn decode_hex(hex: []const u8, dest: []u8) !void {
                 target.* = ((c - 'A' + 10) << 4) | 0;
             },
             'a'...'f' => if (shifted) {
-                target.* |= (c - 'A' + 10);
+                target.* |= (c - 'a' + 10);
             } else {
-                target.* = ((c - 'A' + 10) << 4) | 0;
+                target.* = ((c - 'a' + 10) << 4) | 0;
             },
             else => return error.DecodeError,
         }
@@ -115,4 +126,18 @@ test "badcrypt test case #1" {
     encode_b64(buffer[0..48], &encoded_result);
 
     try testing.expectEqualStrings(base64, encoded_result[0..64]);
+}
+
+test "badcrypt test case #2" {
+    var first_decode: [256]u8 = undefined;
+    var second_decode: [256]u8 = undefined;
+    try decode_hex("1c0111001f010100061a024b53535009181c", &first_decode);
+    try decode_hex("686974207468652062756c6c277320657965", &second_decode);
+
+    var result: [256]u8 = undefined;
+    const result_slice = xor_slices(first_decode[0..18], second_decode[0..18], &result);
+
+    var result_decode: [256]u8 = undefined;
+    try decode_hex("746865206b696420646f6e277420706c6179", &result_decode);
+    try testing.expectEqualSlices(u8, result_decode[0..18], result_slice);
 }
