@@ -2,6 +2,8 @@ const std = @import("std");
 const assert = std.debug.assert;
 const testing = std.testing;
 
+const hex = @import("./hex.zig");
+
 pub fn xor_slices(a: []const u8, b: []const u8, dest: []u8) []const u8 {
     assert(a.len == b.len);
     assert(a.len <= dest.len);
@@ -11,37 +13,6 @@ pub fn xor_slices(a: []const u8, b: []const u8, dest: []u8) []const u8 {
     }
 
     return dest[0..a.len];
-}
-
-/// Decodes a hex string into a given byte slice. The byte slice must be at least
-/// half the length of the hex string.
-pub fn decode_hex(hex: []const u8, dest: []u8) !void {
-    std.debug.assert(dest.len * 2 >= hex.len);
-
-    for (hex, 0..) |c, i| {
-        const destByte = i / 2;
-        const shifted = i % 2 != 0;
-
-        var target = &dest[destByte];
-        switch (c) {
-            '0'...'9' => if (shifted) {
-                target.* |= c - '0';
-            } else {
-                target.* = ((c - '0') << 4) | 0;
-            },
-            'A'...'F' => if (shifted) {
-                target.* |= (c - 'A' + 10);
-            } else {
-                target.* = ((c - 'A' + 10) << 4) | 0;
-            },
-            'a'...'f' => if (shifted) {
-                target.* |= (c - 'a' + 10);
-            } else {
-                target.* = ((c - 'a' + 10) << 4) | 0;
-            },
-            else => return error.DecodeError,
-        }
-    }
 }
 
 pub fn encode_b64(src: []const u8, dest: []u8) void {
@@ -75,35 +46,6 @@ fn base64_std(b: u6) u8 {
     }
 }
 
-test "decode_hex min value" {
-    var buffer: [256]u8 = undefined;
-    try decode_hex("00", &buffer);
-
-    try testing.expectEqualSlices(u8, buffer[0..1], &[1]u8{0});
-}
-
-test "decode_hex max value" {
-    var buffer: [256]u8 = undefined;
-    try decode_hex("FF", &buffer);
-
-    try testing.expectEqualSlices(u8, buffer[0..1], &[1]u8{255});
-}
-
-test "decode_hex multiple bytes" {
-    var buffer: [256]u8 = undefined;
-    try decode_hex("B2380490527A2136", &buffer);
-
-    try testing.expectEqualSlices(u8, buffer[0..8], &[8]u8{
-        178, 56, 4, 144, 82, 122, 33, 54,
-    });
-}
-
-test "decode_hex invalid input" {
-    var buffer: [256]u8 = undefined;
-
-    try testing.expectError(error.DecodeError, decode_hex("ZZ", &buffer));
-}
-
 test "encode_b64 min" {
     var buffer: [256]u8 = undefined;
     encode_b64(&[3]u8{ 0, 0, 0 }, &buffer);
@@ -117,12 +59,12 @@ test "encode_b64 max" {
 }
 
 test "badcrypt test case #1" {
-    const hex = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+    const input_hex = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
     const base64 = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
 
     var buffer: [256]u8 = undefined;
     var encoded_result: [256]u8 = undefined;
-    try decode_hex(hex, &buffer);
+    try hex.decode(input_hex, &buffer);
     encode_b64(buffer[0..48], &encoded_result);
 
     try testing.expectEqualStrings(base64, encoded_result[0..64]);
@@ -131,13 +73,13 @@ test "badcrypt test case #1" {
 test "badcrypt test case #2" {
     var first_decode: [256]u8 = undefined;
     var second_decode: [256]u8 = undefined;
-    try decode_hex("1c0111001f010100061a024b53535009181c", &first_decode);
-    try decode_hex("686974207468652062756c6c277320657965", &second_decode);
+    try hex.decode("1c0111001f010100061a024b53535009181c", &first_decode);
+    try hex.decode("686974207468652062756c6c277320657965", &second_decode);
 
     var result: [256]u8 = undefined;
     const result_slice = xor_slices(first_decode[0..18], second_decode[0..18], &result);
 
     var result_decode: [256]u8 = undefined;
-    try decode_hex("746865206b696420646f6e277420706c6179", &result_decode);
+    try hex.decode("746865206b696420646f6e277420706c6179", &result_decode);
     try testing.expectEqualSlices(u8, result_decode[0..18], result_slice);
 }
