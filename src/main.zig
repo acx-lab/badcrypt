@@ -99,3 +99,34 @@ test "badcrypt test case #3" {
 
     try testing.expectEqualStrings(expected, decrypted);
 }
+
+test "badcrypt test case #4" {
+    const datafile = try std.fs.cwd().openFile("datasets/1_4.txt", .{});
+    defer datafile.close();
+
+    const file = try datafile.readToEndAlloc(testing.allocator, 36_000);
+    defer testing.allocator.free(file);
+
+    var lineIterator = std.mem.split(u8, file, "\n");
+    var score: f32 = 1.0;
+    const most_likely: []u8 = try testing.allocator.alloc(u8, 30);
+    defer testing.allocator.free(most_likely);
+    // Loops through each line in the file and decrypts it, scores the decrypted output,
+    // and keeps track of the decrypted output with the highest score.
+    while (lineIterator.next()) |line| {
+        var buf: [256]u8 = undefined;
+        try hex.decode(line, &buf);
+
+        const decrypted = try testing.allocator.dupe(u8, buf[0 .. line.len / 2]);
+        defer testing.allocator.free(decrypted);
+        decoders.single_byte_xor(decrypted, buf[0 .. line.len / 2]);
+
+        const line_score = decoders.score(decrypted);
+        if (decoders.score(decrypted) > score) {
+            score = line_score;
+            @memcpy(most_likely, decrypted);
+        }
+    }
+
+    std.debug.print("{s}\n", .{most_likely});
+}

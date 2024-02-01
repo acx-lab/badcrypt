@@ -25,7 +25,7 @@ pub fn single_byte_xor(decrypted: []u8, b: []const u8) void {
     }
 }
 
-fn score(attempt: []const u8) f32 {
+pub fn score(attempt: []const u8) f32 {
     var s: f32 = 1;
     for (attempt) |c| {
         switch (c) {
