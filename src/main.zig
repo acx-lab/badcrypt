@@ -3,6 +3,7 @@ const assert = std.debug.assert;
 const testing = std.testing;
 
 const hex = @import("./hex.zig");
+const decoders = @import("./decoders.zig");
 
 pub fn xor_slices(a: []const u8, b: []const u8, dest: []u8) []const u8 {
     assert(a.len == b.len);
@@ -82,4 +83,19 @@ test "badcrypt test case #2" {
     var result_decode: [256]u8 = undefined;
     try hex.decode("746865206b696420646f6e277420706c6179", &result_decode);
     try testing.expectEqualSlices(u8, result_decode[0..18], result_slice);
+}
+
+test "badcrypt test case #3" {
+    const input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
+    const expected = "Cooking MC's like a pound of bacon";
+    const input_bytes = input.len / 2;
+
+    var buf: [input_bytes]u8 = undefined;
+    try hex.decode(input, &buf);
+
+    const decrypted = try testing.allocator.dupe(u8, &buf);
+    defer testing.allocator.free(decrypted);
+    decoders.single_byte_xor(decrypted, &buf);
+
+    try testing.expectEqualStrings(expected, decrypted);
 }
