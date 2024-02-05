@@ -128,5 +128,26 @@ test "badcrypt test case #4" {
         }
     }
 
-    std.debug.print("{s}\n", .{most_likely});
+    try testing.expectEqualStrings("Now that the party is jumping\n", most_likely);
+}
+
+pub fn repeated_key_xor(key: []const u8, data: []u8) !void {
+    for (0..data.len) |i| {
+        data[i] = data[i] ^ key[i % key.len];
+    }
+}
+
+test "badcrypt test case #5" {
+    const input = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
+    const key = "ICE";
+    const expected =
+        "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272" ++ "a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+
+    var encrypted_input: [input.len]u8 = undefined;
+    @memcpy(&encrypted_input, input);
+
+    try repeated_key_xor(key, &encrypted_input);
+    const hex_encoded_result = std.fmt.bytesToHex(&encrypted_input, .lower);
+
+    try testing.expectEqualStrings(expected, &hex_encoded_result);
 }
