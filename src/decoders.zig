@@ -1,8 +1,6 @@
 const std = @import("std");
 const testing = std.testing;
 
-const MOST_COMMON_CHAR = "e";
-
 pub fn single_byte_xor(decrypted: []u8, b: []const u8) void {
     var key: ?usize = undefined;
     var max_score: f32 = 1.0;
