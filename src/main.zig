@@ -4,10 +4,12 @@ const testing = std.testing;
 
 const decoders = @import("./decoders.zig");
 const encoders = @import("./encoders.zig");
+const util = @import("./util.zig");
 
 pub fn xor_slices(a: []const u8, b: []const u8, dest: []u8) []const u8 {
     assert(a.len == b.len);
     assert(a.len <= dest.len);
+    _ = util.hamming_distance(a, b);
 
     for (a, b, 0..) |an, bn, i| {
         dest[i] = an ^ bn;
